@@ -1,0 +1,42 @@
+頑張って考えてみたお^_^
+model User {
+user_id Int @id @default(autoincrement())
+user_name String
+password String @unique
+createdAt DateTime @default(now())
+}
+
+model Task{
+task_id int @id @default(autoincrement())
+task_name varchar(30)
+}
+
+Timemanagement{
+
+}
+
+Userstatus{
+id int
+userId User @relation(fields: [user_id], references: [id])
+}
+
+
+
+自分が考えたゲームに必要だと思う項目(正規化のため)
+・user_id
+・user_name
+・password (被ってはいけない)
+・いつユーザー登録したかの日時(createdAt)
+・task_name 
+・task_id
+・day(一週間の月から金の管理)
+・status_id(ユーザーのステータス)
+・points(社畜ポイント(0p-100p))
+・overwork_time(残業時間)
+・aliveornot(生存状態)
+・task_level(タスクのブラック度)
+・time_management(２時間おきの時間)
+・gameovertime(ゲームオーバーの時間)
+
+
+
