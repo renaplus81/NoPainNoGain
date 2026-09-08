@@ -1,4 +1,4 @@
-頑張って考えてみたお^_^
+頑張って考えてみた^_^
 model User {
 user_id Int @id @default(autoincrement())
 user_name String
@@ -39,4 +39,45 @@ userId User @relation(fields: [user_id], references: [id])
 ・gameovertime(ゲームオーバーの時間)
 
 
+--------------------------------
+User...ゲームを何回作り直しても変わらないもの
+Task...ゲーム中のタスク
+GamePlay...同じユーザーでも１ゲームごと上書きされるのではなく、新しいゲーム記録として残される
+OvertimeLog...残業が発生したという出来事の記録、都度新しい行が増える。
 
+⭕️User
+id (PK)
+name
+password
+createdAt
+
+⭕️Task
+id (PK)
+name
+duration_p(所要時間)
+Irrational_p(理不尽)
+needed_p(必要な社畜ポイント) ※後で以上以下を追加
+
+⭕️GamePlay(1回のプレイの”今の状況”を表すエンティティ)
+id (PK)
+status(プレイ中/死亡) ※プレイ前を入れるかどうかわからない
+❌duration_total
+❌Irrational_total
+→totalに関しては、必要な時にsumをして出せばいい。また、ここに書いてしまうと、手動で書き換えなくてはならなくなる(消して)
+❌slave_p(社畜ポイント)
+→社畜ポイントはovertimelogに記録された、すべての(残業記録x理不尽指数)の合計なので、わざわざここでカラムで保存しておく必要がない。
+
+⭕️OvertimeLog
+(自分で考えられなかった。
+タスクを完了した後、残業が発生した、という１件の出来事を記録するものらしい
+中身も何を書けばいいか考えられなかったです。)
+id: (PK)
+day_number: (何日目に発生したかという情報)
+task_id: (どのタスクによる残業なのか) (FK)
+overtime_hours: (そのタスクによって何時間残業したか、19:00(定時)を超えた分だけ)
+
+
+→これでER図作ってみます(区切り)
+※google documentsには画像が貼ってある
+
+-----------------------------------------------------
