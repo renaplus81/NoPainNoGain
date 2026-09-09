@@ -117,8 +117,18 @@ docker run --rm -it -v "$PWD":/app -w /app node:22-trixie-slim \
     --import-alias '@/*' --use-pnpm --skip-install"
 この時点でエラーが出るのは詰みだわ。折れそう。next.jsの一番最初なのに
 無理や、できない、1時間半くらいここで止まってます。今15:25。(14:00~)
-chat gptとclaudeに聞いても何回も同じコード書かされるので、AIには解決が出来ない。
+chat gptとclaudeに聞いても何回も同じコード書かされるの
 
 →今渡邊さんに聞いている
+docker run --rm -it \
+-v "$PWD":/app \
+-w /tmp \
+node:22-trixie-slim \
+bash -c "corepack enable && pnpm dlx create-next-app@latest /app \
+--typescript --eslint --tailwind --app --src-dir \
+--import-alias '@/*' --use-pnpm --skip-install"
+
+aiの使い方がダメなのか。なんで出来なかったんだろう
+
 
 ----------------------------
