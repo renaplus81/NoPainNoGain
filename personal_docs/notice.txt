@@ -19,4 +19,8 @@ git checkout -b ブランチ名 別のブランチから新しいブランチを
 gameplayをユーザーに結びつけるのと、タスクに結びつけるのと何が違うんだろう。
 →いやgameplayの中に利用者IDあるのになんでだ？混乱したからtableに戻る。
 →gameplayの中にFKの利用者idがあるが、そもそもuserとtaskが1対多の関係がだからかもしれない。
-→user(多のやつ)とtaskの間に中間テーブルを作るのは？(tableへ戻る)
+→user(多のやつ)とtaskの間に中間テーブルを作るのは？(problemsへ)
+
+git stash -u → 未追跡ファイルも含めて一時退避
+git stash pop → 退避したファイルを戻す
+git rm --cached → ローカルには残してGit管理から外す
