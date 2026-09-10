@@ -136,3 +136,22 @@ problemへ記載(🐇)
 -----------------------------------------------------
 
 次は正規化(normalization.txtへ)
+
+-----------------------------------------------------
+最終更新(0910 15:32)
+※社畜ポイントやタスクの２段階ロックは一旦なし
+
+User(利用者)
+  id, user_name, password, createdAt
+
+GamePlay(ゲームの状況)
+  id, user_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
+
+Task(タスク)
+  id, user_id(FK), task_name, duration_p, irrational_p
+
+TaskProgress(ステータス管理)
+  id, gameplay_id(FK), task_id(FK), task_status(タスクステータス: 未完了/完了)
+
+OvertimeLog(残業記録)
+  id, day_number, task_id(FK), overtime_hours
