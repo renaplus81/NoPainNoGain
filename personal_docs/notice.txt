@@ -24,3 +24,16 @@ gameplayをユーザーに結びつけるのと、タスクに結びつけるの
 git stash -u → 未追跡ファイルも含めて一時退避
 git stash pop → 退避したファイルを戻す
 git rm --cached → ローカルには残してGit管理から外す
+
+Q. git commit やpushするときの自分がいるフォルダの位置って重要？
+git add . → 今いる場所が重要 
+git commit → addされた変更を記録する 
+git push → ブランチのコミットをGitHubへ送る
+
+git add -A は、ファイル移動をGitに「次のコミットに入れる変更」として登録するコマンド。
+
+SSHではなくhttpでGithubに接続したので、鍵認証がいらなかった。
+branch消すなら2段階で消さなくてはいけない。(github上とmac/コンテナ上)
+・github: git push origin --delete ブランチ名
+・ローカル: git branch -d ブランチ名
+
