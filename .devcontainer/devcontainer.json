@@ -4,7 +4,8 @@
     "service": "app",
     "workspaceFolder": "/app",
     "shutdownAction": "stopCompose",
-    "forwardPorts": [3000],
+    // 5555はprisma studio用
+    "forwardPorts": [3000, 5555],
     "postCreateCommand": "pnpm install",
     "customizations": {
         "vscode":{

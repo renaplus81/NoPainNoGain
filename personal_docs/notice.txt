@@ -33,7 +33,9 @@ git push → ブランチのコミットをGitHubへ送る
 git add -A は、ファイル移動をGitに「次のコミットに入れる変更」として登録するコマンド。
 
 SSHではなくhttpでGithubに接続したので、鍵認証がいらなかった。
-branch消すなら2段階で消さなくてはいけない。(github上とmac/コンテナ上)
+branch消すなら2段階で消さなくてはいけない。(github上とローカル※mac/コンテナ上)
 ・github: git push origin --delete ブランチ名
 ・ローカル: git branch -d ブランチ名
 
+.envに書くのは(ユーザー、パス、DB(接続先))
+DATABASE_URL="postgresql://rena:rena@db:5432/heyjude"
