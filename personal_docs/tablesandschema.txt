@@ -1,0 +1,235 @@
+頑張って考えてみた^_^
+model User {
+user_id Int @id @default(autoincrement())
+user_name String
+password String @unique
+createdAt DateTime @default(now())
+}
+
+model Task{
+task_id int @id @default(autoincrement())
+task_name varchar(30)
+}
+
+Timemanagement{
+
+}
+
+Userstatus{
+id int
+userId User @relation(fields: [user_id], references: [id])
+}
+
+
+
+自分が考えたゲームに必要だと思う項目(正規化のため)
+・user_id
+・user_name
+・password (被ってはいけない)
+・いつユーザー登録したかの日時(createdAt)
+・task_name 
+・task_id
+・day(一週間の月から金の管理)
+・status_id(ユーザーのステータス)
+・points(社畜ポイント(0p-100p))
+・overwork_time(残業時間)
+・aliveornot(生存状態)
+・task_level(タスクのブラック度)
+・time_management(２時間おきの時間)
+・gameovertime(ゲームオーバーの時間)
+
+
+--------------------------------
+User...ゲームを何回作り直しても変わらないもの
+Task...ゲーム中のタスク
+GamePlay...同じユーザーでも１ゲームごと上書きされるのではなく、新しいゲーム記録として残される
+OvertimeLog...残業が発生したという出来事の記録、都度新しい行が増える。
+
+⭕️User
+id (PK)
+name
+password
+createdAt
+
+⭕️Task
+id (PK)
+name
+duration_p(所要時間)
+Irrational_p(理不尽)
+needed_p(必要な社畜ポイント) ※後で以上以下を追加
+
+⭕️GamePlay(1回のプレイの”今の状況”を表すエンティティ)
+id (PK)
+status(プレイ中/死亡) ※プレイ前を入れるかどうかわからない
+❌duration_total
+❌Irrational_total
+→totalに関しては、必要な時にsumをして出せばいい。また、ここに書いてしまうと、手動で書き換えなくてはならなくなる(消して)
+❌slave_p(社畜ポイント)
+→社畜ポイントはovertimelogに記録された、すべての(残業記録x理不尽指数)の合計なので、わざわざここでカラムで保存しておく必要がない。
+
+⭕️OvertimeLog
+(自分で考えられなかった。
+タスクを完了した後、残業が発生した、という１件の出来事を記録するものらしい
+中身も何を書けばいいか考えられなかったです。)
+id: (PK)
+day_number: (何日目に発生したかという情報)
+task_id: (どのタスクによる残業なのか) (FK)
+overtime_hours: (そのタスクによって何時間残業したか、19:00(定時)を超えた分だけ)
+
+
+→これでER図作ってみます(区切り)
+※google documentsには画像が貼ってある
+
+-----------------------------------------------------
+・新しく作成しましたが、GamePlayとtaskの関係がまだ未完成のよう。外部キーがないのになんとなくuserとgameplayを繋げてしまっていた。
+
+タスクは、一回ごとのゲームプレイに紐づくものか、利用者ごとに紐づくものか？
+→もう頭回らがんばれ　
+→→ゲーム開始前にタスク一覧が見れたり、編集できたりする。スタート後はそれらはできない
+→→ここまで言われてもわからないので聞きました。スタート後はできないので利用者だ。Userです。なぜならそのプレイ専用のタスクではなく、ユーザーごとのタスクがいいから。がんばれ
+→→利用者IDをタスクに持たせるんだと思う。
+
+
+・治せたが今度はgameplayとtaskが紐づいているのがダメなんだそう。やばい
+user1にgameplayが多で紐づいている関係。
+
+なんのためにgameplayがあるのかと聞いたら、claudeに質問されました。
+**もし「1人のUserに、直接statusを持たせてしまう」としたら、GamePlayというテーブル自体が丸ごと不要になりそうですが、それでも良いと思いますか?**
+→(自分で考えてみまし)usersはもしかしたら何回もプレイする可能性があり、その場合一回死んでしまって次にプレイするときに値に上書きされるため、もし記録として同じプレイヤーが別ゲームをやったものを残したいならgameplayでステータスを別にするべきかもしれないと思った。
+→→いや一人一回ってどっかで決めたらしい、忘れてた。(要件定義書に書いてあった)
+→ではなぜuserにstatusを持たせずにgameplayを分けたのか？cluadeに質問した。
+→→別にuserにstatusを持たせても良かったみたい。でも念の為将来複数回プレイできるようにルールが変わった時のための保険の意味合いが強かったそう、何それ知らない
+最終的にuserとgameplayを繋げた。(完)
+
+userとgameplayを繋げたのにも関わらずFKがgameplayになかった！(claudeが気づかなかった、こわ)
+→追加しました。
+
+-----------------------------------------------------
+🐇User
+id (PK)
+user_name
+password
+createdAt
+
+GamePlay
+id (PK)
+user_id (UserのidのFK)
+status
+
+Task
+id (PK)
+user_id (UserのidのFK)
+task_name
+duration_p
+Irrational_p
+needed_p
+
+OvertimeLog
+id (PK)
+day_number
+task_id (TaskのidのFK)
+overtime_hours
+
+→確認中
+problemへ記載(🐇)
+
+-----------------------------------------------------
+
+次は正規化(normalization.txtへ)
+
+-----------------------------------------------------
+最終更新(0910 15:32)→(🎀0910 18:00)
+※社畜ポイントやタスクの２段階ロックは一旦なし
+🎀OvertimeLogにgameplay_id(FK)追加(Gameplayから削除)
+
+User(利用者)
+  id, 	user_name, password, createdAt
+
+GamePlay(ゲームの状況)
+  id, 	user_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
+
+Task(タスク)
+  id, 	user_id(FK), task_name, duration_p, irrational_p
+
+TaskProgress(ステータス管理)
+  id, 	gameplay_id(FK), task_id(FK), task_status(タスクステータス: 未完了/完了)
+
+OvertimeLog(残業記録)
+  id, 	task_id(FK), gameplay_id(FK),  overtime_hours
+  -----------------------------------------------------
+
+                ⬇️⬇️ここからschema⬇️⬇️
+※AI出力前
+制約系やわからないところはネットで一覧をみて、それ以外はテキストの知識。コードそのままは絶対出してもらわない。
+
+model User{
+  id           Int         @id @default(autoincrement())
+  user_name    String
+  password     String      @unique
+  createdAt    DateTime    @default(now())
+
+  onegame      GamePlay[]
+  playerstask  Task[]
+}
+
+model GamePlay{
+  id               Int       @id @default(autoincrement())
+  user_id          Int       
+  user             User      @relation(fields: [user_id], references: [id])
+  player_status    String
+
+  progressOfgame   TaskProgress[]
+  overtimelog      OvertimeLog[]
+}
+
+model Task{
+  id              Int       @id @default(autoincrement())
+  user_id         Int 
+  user            User      @relation(fields: [user_id], references: [id])
+  task_name       String
+  duration_p      Int
+  irrational_p    Int
+
+  progressOftask    TaskProgress[]
+  overtimelog       OvertimeLog[]
+}
+
+model TaskProgress{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  task_status      Int
+
+  @@unique([task_id, gameplay_id])
+}
+
+model OvertimeLog{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  overtime_hours   Int
+}
+
+※claudeさんに添削してもらった
+(Gameplay[] → GamePlay[](大文字小文字、揃いました)
+progressOfgame GamePlay[] → progressOfgame TaskProgress[](正しい関連先に直りました)
+@relatioin → @relation(2箇所とも修正できています))
+
+-------------
+→→追加で質問された。中間テーブルに二重制約(unique)が必要かどうか
+gameplay_idと主キー(id)の二重unique?
+→→いいえ、task_id, gameplay_idです。外部キー同士
+一つのgameplayに同じtaskを登録できないようにするため。
+※TaskProgressに@@unique([task_id, gameplay_id])を追加
+
+➡️0911 お昼後、渡邊さんにテーブル構成確認してもらう。
+・利用者とタスクのテーブル同士のリレーションはいるかどうか→いらないかも、繋がっている理由がわからない。
+・ゲーム状況テーブルとステータス管理テーブルを分ける必要があるかどうか
+
+自分で思ったのはまず
+・なんで利用者とタスクのデーブルにリレーションがあるのか
+・なぜわざわざ残業テーブルを作成したのか。
