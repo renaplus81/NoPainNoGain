@@ -135,4 +135,4 @@ taskprogressはタスクに関するステータス、gameplayはプレーヤー
 updateAtとdefaultnowの違いがわからん
 →→動くタイミングの違い
 データが新しく追加された時のみ動くのがdefault(now())で、データが書き換えられた時全てに動くのがupdatedAt。
-なので、私の場合はユーザー登録日なのでdefault(now())でOKだと考えました。
+私の場合はユーザー登録日なのでdefault(now())でOKだと考えました。

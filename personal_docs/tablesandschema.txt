@@ -201,6 +201,8 @@ model TaskProgress{
   gameplay_id      Int
   gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
   task_status      Int
+
+  @@unique([task_id, gameplay_id])
 }
 
 model OvertimeLog{
@@ -225,3 +227,9 @@ gameplay_idと主キー(id)の二重unique?
 ※TaskProgressに@@unique([task_id, gameplay_id])を追加
 
 ➡️0911 お昼後、渡邊さんにテーブル構成確認してもらう。
+・利用者とタスクのテーブル同士のリレーションはいるかどうか→いらないかも、繋がっている理由がわからない。
+・ゲーム状況テーブルとステータス管理テーブルを分ける必要があるかどうか
+
+自分で思ったのはまず
+・なんで利用者とタスクのデーブルにリレーションがあるのか
+・なぜわざわざ残業テーブルを作成したのか。

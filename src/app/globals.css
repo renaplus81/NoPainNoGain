@@ -1,3 +1,4 @@
+/* アプリ全体のCSS設計時に使用するファイル */
 @import "tailwindcss";
 
 :root {
