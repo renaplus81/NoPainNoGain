@@ -221,5 +221,7 @@ progressOfgame GamePlay[] → progressOfgame TaskProgress[](正しい関連先�
 →→追加で質問された。中間テーブルに二重制約(unique)が必要かどうか
 gameplay_idと主キー(id)の二重unique?
 →→いいえ、task_id, gameplay_idです。外部キー同士
+一つのgameplayに同じtaskを登録できないようにするため。
+※TaskProgressに@@unique([task_id, gameplay_id])を追加
 
-TaskProgressに@@unique([task_id, gameplay_id])を追加
+➡️0911 お昼後、渡邊さんにテーブル構成確認してもらう。

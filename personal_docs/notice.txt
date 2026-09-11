@@ -50,4 +50,7 @@ GamePlay(ゲームの状況)
   id, user_id(FK), OvertimeLog_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
 こう書いていたが、これはダメらしい、残業状況が多のため。(OvertimeLogのidではなく、GameplayのidをFK(OvertimeLogエンティティ内))
 
-migrate→generate
+
+0911 11:39 migrate → generate:
+設計図と実際のDBの差分、というのがよく理解できていなかったが、
+claudeに聞いたら、schema.prismaと現在あるDB(最初は空)との差分のことで、schema.を変更したときは、変更した部分のことを差分と指している。
