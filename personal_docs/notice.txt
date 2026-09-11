@@ -49,3 +49,5 @@ gameplayにovertimelog_idを繋げて残業記録をゲーム状況に反映で�
 GamePlay(ゲームの状況)
   id, user_id(FK), OvertimeLog_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
 こう書いていたが、これはダメらしい、残業状況が多のため。(OvertimeLogのidではなく、GameplayのidをFK(OvertimeLogエンティティ内))
+
+migrate→generate

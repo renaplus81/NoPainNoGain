@@ -18,7 +18,7 @@ model User{
   password     String      @unique
   createdAt    DateTime    @default(now())
 
-  onegame      Gameplay[]
+  onegame      GamePlay[]
   playerstask  Task[]
 }
 
@@ -51,6 +51,8 @@ model TaskProgress{
   gameplay_id      Int
   gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
   task_status      Int
+
+  @@unique([task_id, gameplay_id])
 }
 
 model OvertimeLog{
