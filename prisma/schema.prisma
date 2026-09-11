@@ -11,3 +11,53 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User{
+  id           Int         @id @default(autoincrement())
+  user_name    String
+  password     String      @unique
+  createdAt    DateTime    @default(now())
+
+  onegame      Gameplay[]
+  playerstask  Task[]
+}
+
+model GamePlay{
+  id               Int       @id @default(autoincrement())
+  user_id          Int       
+  user             User      @relation(fields: [user_id], references: [id])
+  player_status    String
+
+  progressOfgame   TaskProgress[]
+  overtimelog      OvertimeLog[]
+}
+
+model Task{
+  id              Int       @id @default(autoincrement())
+  user_id         Int 
+  user            User      @relation(fields: [user_id], references: [id])
+  task_name       String
+  duration_p      Int
+  irrational_p    Int
+
+  progressOftask    TaskProgress[]
+  overtimelog       OvertimeLog[]
+}
+
+model TaskProgress{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  task_status      Int
+}
+
+model OvertimeLog{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  overtime_hours   Int
+}

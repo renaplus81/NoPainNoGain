@@ -46,3 +46,4 @@ SSHではなくhttpでGithubに接続したので、鍵認証がいらなかっ�
 ----------------------------
 ここからprisma(nextjsでおよそ8時間かかりました。)
 問題なく、prisma環境構築のテキスト手順5まで終わりました。
+→→prisma setup has probably done. (0910)

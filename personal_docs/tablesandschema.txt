@@ -138,20 +138,81 @@ problemへ記載(🐇)
 次は正規化(normalization.txtへ)
 
 -----------------------------------------------------
-最終更新(0910 15:32)
+最終更新(0910 15:32)→(🎀0910 18:00)
 ※社畜ポイントやタスクの２段階ロックは一旦なし
+🎀OvertimeLogにgameplay_id(FK)追加(Gameplayから削除)
 
 User(利用者)
-  id, user_name, password, createdAt
+  id, 	user_name, password, createdAt
 
 GamePlay(ゲームの状況)
-  id, user_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
+  id, 	user_id(FK), player_status(ユーザーステータス: プレイ中/死亡/生存クリア)
 
 Task(タスク)
-  id, user_id(FK), task_name, duration_p, irrational_p
+  id, 	user_id(FK), task_name, duration_p, irrational_p
 
 TaskProgress(ステータス管理)
-  id, gameplay_id(FK), task_id(FK), task_status(タスクステータス: 未完了/完了)
+  id, 	gameplay_id(FK), task_id(FK), task_status(タスクステータス: 未完了/完了)
 
 OvertimeLog(残業記録)
-  id, day_number, task_id(FK), overtime_hours
+  id, 	task_id(FK), gameplay_id(FK),  overtime_hours
+  -----------------------------------------------------
+
+                ⬇️⬇️ここからschema⬇️⬇️
+※AI出力前
+制約系やわからないところはネットで一覧をみて、それ以外はテキストの知識。コードそのままは絶対出してもらわない。
+
+model User{
+  id           Int         @id @default(autoincrement())
+  user_name    String
+  password     String      @unique
+  createdAt    DateTime    @default(now())
+
+  onegame      GamePlay[]
+  playerstask  Task[]
+}
+
+model GamePlay{
+  id               Int       @id @default(autoincrement())
+  user_id          Int       
+  user             User      @relation(fields: [user_id], references: [id])
+  player_status    String
+
+  progressOfgame   TaskProgress[]
+  overtimelog      OvertimeLog[]
+}
+
+model Task{
+  id              Int       @id @default(autoincrement())
+  user_id         Int 
+  user            User      @relation(fields: [user_id], references: [id])
+  task_name       String
+  duration_p      Int
+  irrational_p    Int
+
+  progressOftask    TaskProgress[]
+  overtimelog       OvertimeLog[]
+}
+
+model TaskProgress{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  task_status      Int
+}
+
+model OvertimeLog{
+  id               Int       @id @default(autoincrement())
+  task_id          Int
+  task             Task      @relation(fields: [task_id], references: [id])
+  gameplay_id      Int
+  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
+  overtime_hours   Int
+}
+
+※claudeさんに添削してもらった
+(Gameplay[] → GamePlay[](大文字小文字、揃いました)
+progressOfgame GamePlay[] → progressOfgame TaskProgress[](正しい関連先に直りました)
+@relatioin → @relation(2箇所とも修正できています))
