@@ -28,38 +28,27 @@ model GamePlay{
   user             User      @relation(fields: [user_id], references: [id])
   player_status    String
 
-  progressOfgame   TaskProgress[]
-  overtimelog      OvertimeLog[]
+  gameplaydetail   GamePlayDetail[]
 }
 
 model Task{
-  id              Int       @id @default(autoincrement())
-  user_id         Int 
-  user            User      @relation(fields: [user_id], references: [id])
-  task_name       String
-  duration_p      Int
-  irrational_p    Int
+  id                 Int       @id @default(autoincrement())
+  user_id            Int 
+  user               User      @relation(fields: [user_id], references: [id])
+  task_name          String
+  duration           Int
+  irrational         Int
 
-  progressOftask    TaskProgress[]
-  overtimelog       OvertimeLog[]
+  gameplaydetail     GamePlayDetail[]
 }
 
-model TaskProgress{
-  id               Int       @id @default(autoincrement())
-  task_id          Int
-  task             Task      @relation(fields: [task_id], references: [id])
-  gameplay_id      Int
-  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
-  task_status      Int
-
-  @@unique([task_id, gameplay_id])
-}
-
-model OvertimeLog{
-  id               Int       @id @default(autoincrement())
-  task_id          Int
-  task             Task      @relation(fields: [task_id], references: [id])
-  gameplay_id      Int
-  gameplay         GamePlay  @relation(fields: [gameplay_id], references: [id])
-  overtime_hours   Int
+model GamePlayDetail{
+  task_id               Int
+  task                  Task      @relation(fields: [task_id], references: [id])
+  gameplay_id           Int
+  gameplay              GamePlay  @relation(fields: [gameplay_id], references: [id])
+  overtime_hours        Int
+  when_overtime_happen  DateTime
+  
+  @@id([gameplay_id, task_id])
 }

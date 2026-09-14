@@ -219,7 +219,7 @@ model OvertimeLog{
 progressOfgame GamePlay[] → progressOfgame TaskProgress[](正しい関連先に直りました)
 @relatioin → @relation(2箇所とも修正できています))
 
--------------
+---------------------------------------
 →→追加で質問された。中間テーブルに二重制約(unique)が必要かどうか
 gameplay_idと主キー(id)の二重unique?
 →→いいえ、task_id, gameplay_idです。外部キー同士
@@ -233,3 +233,54 @@ gameplay_idと主キー(id)の二重unique?
 自分で思ったのはまず
 ・なんで利用者とタスクのデーブルにリレーションがあるのか
 ・なぜわざわざ残業テーブルを作成したのか。
+----------------------------------------------------
+一旦設計考え直しです。(渡邉さん相談後)※ブランチ名: redesign/task-progress
+確認。テーブル設計再構築します。
+
+渡邉さんver.
+
+user_id 利用者id
+user_name 利用者名
+password パスワード ※省略されていた
+createdAt 登録日 ※省略されていた
+player_status ゲーム中のステータス
+task_id タスクid
+task_name タスク名
+duration タスク所要時間
+irrational タスクの理不尽レベル
+gameplay_id １ゲーム管理するid
+overtime_hours 残業時間 
+when_overtime_happen 残業時間発生日
+(game_detail_id :複合主キーがいやならidを追加しても可とのこと)
+
+tables(4): ゲーム状況テーブル、ゲーム状況詳細テーブル(composite primary key)、利用者テーブル、タスク管理テーブル
+
+→→**頭が詰まってしまったので、claudeにどうすれば良いか聞いてみた**
+
+・タスク状況管理テーブルがないのは、詳細テーブルにタスクがあるかないかだけで完了・未完了が判断できるから。
+・taskテーブルのuser_idっていうのは、自分のユーザーでタスクを登録する機能があったからだ。もし、タスクを作成して誰が作ったかわかるようにしたいならuser_idは必要です。
+・ゲーム詳細の複合主キーは単独主キーと何が変わるのかというと、複合にするとその１ゲームの中で同じタスクは繰り返し出てこないということ。(ゲームidとタスクidの組み合わせが被るものは弾かれる。)
+・残業時間発生日のカラムは必要なのかについて。残業カラムは残業時間を管理するために作っていた気がしたが、ゲーム詳細テーブルに残業時間と残業発生日をカラムとして追加すれば必要ないテーブルだと思うので、消す。
+
+※when_overtime_happenは後から振り返る用の表示用の情報
+(無理そうなら消してもOK)
+----------------------------------------------------
+利用者テーブル(User)
+  user_id(PK), user_name, password, createdAt
+
+ゲーム状況テーブル(GamePlay)
+  gameplay_id(PK), user_id(FK), player_status
+
+タスク管理テーブル(Task)
+  task_id(PK), user_id(FK), task_name, duration, irrational
+
+ゲーム状況詳細テーブル(GamePlayDetail)
+  gameplay_id(PK.FK), task_id(PK.FK), overtime_hours, when_overtime_happen
+
+  スキーマに変換したときに間違っていたこと：
+  ・複合主キーのテーブルになぜか単独主キーのようなidが入っていたのと、@@uniqueを作ってしまっていたこと
+  ・消したテーブルの名前が入っていた
+
+  →→お直し完了(マイグレートへ)
+  pnpm exec prisma migrate dev --name merge-taskprogress-into-gameplaydetail
+
