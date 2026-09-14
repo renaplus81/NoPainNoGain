@@ -14,7 +14,7 @@ datasource db {
 
 model User{
   id           Int         @id @default(autoincrement())
-  user_name    String
+  user_name    String      @unique
   password     String      @unique
   createdAt    DateTime    @default(now())
 

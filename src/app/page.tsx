@@ -1,8 +1,13 @@
 //ここをLanding pageにしたい(/)
-import Image from "next/image";
+import Link from "next/link"
 
 export default function Home() {
   return (
-    <p>click to play here</p>
+    <>
+      <p>一週間生き延びろ</p>
+      <Link href="/login" >
+        ここをタップ
+      </Link>
+    </>
   );
 }
