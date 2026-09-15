@@ -1,0 +1,48 @@
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+
+export default async function TaskList(){
+    const allTasks = await prisma.task.findMany({
+        orderBy:{
+            id: "desc",
+        },
+    });
+
+    return (
+        <div>
+            <h1>タスク一覧</h1>
+
+            {allTasks.length === 0 ? (
+                <p>タスクが登録されていません</p>
+            ):(
+                <table>
+                    <thead>
+                        <tr>
+                            <th>タスク名</th>
+                            <th>所要時間</th>
+                            <th>理不尽度</th>
+                            {/* <th>登録したユーザー名</th>　※時間があれば */}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {allTasks.map((task) => (
+                            <tr key={task.id}>
+                                <td>{task.task_name}</td>
+                                <td>{task.duration}</td>
+                                <td>{task.irrational}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )} 
+
+            <p>現在{allTasks.length}件　のタスクが登録されています。</p>
+            
+            <div>
+                <Link href="/gameplay">ゲームをプレイする</Link>
+            </div>
+
+        </div>
+    );
+}

@@ -22,7 +22,6 @@ export default function RegisterNewTask({params}:Props){
         const duration = Number(formData.get("duration") as string);
         const irrational = Number(formData.get("irrational") as string);
 
-
         const makesureTitle = await prisma.task.findFirst({
             where:{ 
                 task_name: task_name,
@@ -30,8 +29,8 @@ export default function RegisterNewTask({params}:Props){
         });
 
         if(makesureTitle){
-            redirect(`/`)
-            //　まだタスク編集画面一覧を作っていないため一旦仮のURL
+            redirect(`/alltask`)
+            //　まだタスク編集画面一覧を作っていないため一旦仮のURL →OK
         }
 
         const createTask = await prisma.task.create({
@@ -44,8 +43,8 @@ export default function RegisterNewTask({params}:Props){
         });
 
         //仮URL
-        redirect(`/`)
-            //　まだタスク編集画面一覧を作っていないため一旦仮のURL
+        redirect(`/alltask`)
+            //　まだタスク編集画面一覧を作っていないため一旦仮のURL →OK
     }
 
     return (

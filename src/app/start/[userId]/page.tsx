@@ -4,17 +4,17 @@ import { notFound } from "next/navigation";
 
 
 type ParamPageProps = {
-   params: Promise<{id: string}>
+   params: Promise<{userId: string}>
 };
 
 
 export default async function StartPage({params}: ParamPageProps){
-   const {id} = await params;
+   const {userId} = await params;
 
    //findmanyだと複数件取得するため[]で帰ってきてしまうが、uniqueの場合は一件取得のためオブジェクトかnullで返してくれる
    const user = await prisma.user.findUnique({
         where:{
-            id:Number(id)
+            id: Number(userId)
         },
         include:{
             // リレーションの自分で決めた名前
@@ -23,6 +23,7 @@ export default async function StartPage({params}: ParamPageProps){
     });
 
     
+
     if(!user) notFound();
 
 
@@ -45,6 +46,7 @@ export default async function StartPage({params}: ParamPageProps){
                         <td>{user?.user_name}</td>
                     </tr>
 
+                    {/* ここよくわからない */}
                     {/* .mapは配列にしか使えないオブジェクト */}
                     {user.playerstask.map((playerstask) =>(
                         //key忘れていた
