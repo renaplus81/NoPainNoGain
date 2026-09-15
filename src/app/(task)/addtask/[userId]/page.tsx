@@ -1,6 +1,6 @@
 import {prisma} from "@/lib/prisma";
 import {redirect} from "next/navigation";
-import Link from"next/link";
+import Link from "next/link";
 
 //タスクの新規追加
 
@@ -42,8 +42,8 @@ export default function RegisterNewTask({params}:Props){
             },
         });
 
-        //仮URL
-        redirect(`/alltask`)
+        
+        redirect(`/alltask/${userId}`)
             //　まだタスク編集画面一覧を作っていないため一旦仮のURL →OK
     }
 

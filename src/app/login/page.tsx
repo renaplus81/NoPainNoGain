@@ -51,7 +51,7 @@ export default function LoginPage(){
 
                     
                     <button type="submit">
-                        登録する
+                        ログインする
                     </button>
 
                 </form>

@@ -30,10 +30,16 @@ export default async function StartPage({params}: ParamPageProps){
 
    return (
     <div>
-        <p>ここなんかかくん</p>
-        <Link href="/login">
-        ログイン画面に戻る
-        </Link>
+        <div>
+            <p>tst            </p>
+        </div>
+
+        <div>
+            <Link href={`/login`}>
+            ログイン画面に戻る
+            </Link>
+        </div>
+
 
         <h1>{user?.user_name}</h1>
 
@@ -58,6 +64,10 @@ export default async function StartPage({params}: ParamPageProps){
                 </tbody>
             </table>
         </section>
+
+        <div>
+            <Link href={`/addtask/${userId}`}>タスクを追加する</Link>
+        </div>
    </div>
    );
 }
