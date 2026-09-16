@@ -48,6 +48,7 @@ export default async function StartPage({params}: ParamPageProps){
             redirect(`/gameplay/${gamePlay.id}`);
         }
 
+       
 
 
    return (

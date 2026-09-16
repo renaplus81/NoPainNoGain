@@ -60,6 +60,7 @@ export default async function TaskEditPage({params}: Props){
 
         //エラーでてmす
         //userIdつけたいのに、無理だー多分上でやるんだろうな
+        //notfoundをつけたら直りました。
         redirect(`/alltask/${task.user_id}`);
     }
 
