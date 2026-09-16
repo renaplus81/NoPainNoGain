@@ -4,17 +4,17 @@ import { notFound } from "next/navigation";
 
 
 type ParamPageProps = {
-   params: Promise<{id: string}>
+   params: Promise<{userId: string}>
 };
 
 
 export default async function StartPage({params}: ParamPageProps){
-   const {id} = await params;
+   const {userId} = await params;
 
    //findmanyだと複数件取得するため[]で帰ってきてしまうが、uniqueの場合は一件取得のためオブジェクトかnullで返してくれる
    const user = await prisma.user.findUnique({
         where:{
-            id:Number(id)
+            id: Number(userId)
         },
         include:{
             // リレーションの自分で決めた名前
@@ -23,16 +23,23 @@ export default async function StartPage({params}: ParamPageProps){
     });
 
     
+
     if(!user) notFound();
 
 
 
    return (
     <div>
-        <p>ここなんかかくん</p>
-        <Link href="/login">
-        ログイン画面に戻る
-        </Link>
+        <div>
+            <p>tst            </p>
+        </div>
+
+        <div>
+            <Link href={`/login`}>
+            ログイン画面に戻る
+            </Link>
+        </div>
+
 
         <h1>{user?.user_name}</h1>
 
@@ -45,6 +52,7 @@ export default async function StartPage({params}: ParamPageProps){
                         <td>{user?.user_name}</td>
                     </tr>
 
+                    {/* ここよくわからない */}
                     {/* .mapは配列にしか使えないオブジェクト */}
                     {user.playerstask.map((playerstask) =>(
                         //key忘れていた
@@ -56,6 +64,10 @@ export default async function StartPage({params}: ParamPageProps){
                 </tbody>
             </table>
         </section>
+
+        <div>
+            <Link href={`/addtask/${userId}`}>タスクを追加する</Link>
+        </div>
    </div>
    );
 }

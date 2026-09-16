@@ -18,7 +18,7 @@ export default function LoginPage(){
         })
 
         if(user){
-            redirect(`/start?userId=${user.id}`);
+            redirect(`/start/${user.id}`);
         }else{
             redirect(`/login`);
         }
@@ -51,7 +51,7 @@ export default function LoginPage(){
 
                     
                     <button type="submit">
-                        登録する
+                        ログインする
                     </button>
 
                 </form>
