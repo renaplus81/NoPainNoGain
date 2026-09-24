@@ -28,6 +28,7 @@ model GamePlay{
   user             User       @relation(fields: [user_id], references: [id])
   player_status    String
   current_time     Int        @default(600)
+  overtime_days    Int        @default(0) 
 
   gameplaydetail   GamePlayDetail[]
 }

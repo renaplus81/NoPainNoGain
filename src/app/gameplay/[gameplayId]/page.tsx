@@ -132,18 +132,46 @@ export default async function GameStart({params}: Props){
 
         let overtimeHours = 0;
 
+        //1140は19時
         if(startTime >= 1140){
             overtimeHours = duration;
             //なんで途中から超えたかどうかがendTime > 1140でわかるの？
         } else if(endTime > 1140) {
             overtimeHours = endTime - 1140;
         }
+
+
+
+
+        //22時で次の日になる計算(1320は22時)
+        //追加：22時が5回きたらクリア判定
+        if(endTime >= 1320) {
+
+            const newOvertimeDays = currentGameplay.overtime_days + 1;
+
+                await prisma.gamePlay.update({
+                    where: {id: selectedGameplayId},
+                    data:{
+                        current_time: 600,
+                        overtime_days: newOvertimeDays,
+                        player_status: newOvertimeDays >= 5 ? "クリア" : "プレイ中",
+                    },
+                });
+                } else {
+                    await prisma.gamePlay.update({
+                        where:{id: selectedGameplayId},
+                        data: {current_time: endTime},
+                    });
+                }
+
+
         
-        //最後、終わった時間を表すendをcurrent_timeに入れる
-        await prisma.gamePlay.update({
-            where:{id: selectedGameplayId},
-            data: {current_time: endTime},
-        });
+        //2２時で次の日になる計算にelseで処理できるように書いたため、ここ入らなくなった
+        // //最後、終わった時間を表すendをcurrent_timeに入れる
+        // await prisma.gamePlay.update({
+        //     where:{id: selectedGameplayId},
+        //     data: {current_time: endTime},
+        // });
         
 
         await prisma.gamePlayDetail.create({
@@ -155,10 +183,14 @@ export default async function GameStart({params}: Props){
             },
         });
 
-        //今のページのパスを呼び出して更新する。
-        revalidatePath("/gameplay/page.tsx" + selectedGameplayId);
+        //今のページのパスを呼び出して更新する。(コンポーネント関数の再実行)
+        revalidatePath("/gameplay/" + selectedGameplayId);
     }
 
+
+
+    //⭐️⭐️⭐️コンソールで確認したくでclaudeに出してもらった
+    console.log("現在時刻(分):", gameplay.current_time, "22時到達回数:", gameplay.overtime_days);
 
 
 
@@ -186,9 +218,6 @@ export default async function GameStart({params}: Props){
                 </div>
             
                 {/* <form action={次の日に移動する関数とポイント計算関数？}> */}
-
-
-                
 
         </div>
     );
