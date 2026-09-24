@@ -23,10 +23,11 @@ model User{
 }
 
 model GamePlay{
-  id               Int       @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   user_id          Int       
-  user             User      @relation(fields: [user_id], references: [id])
+  user             User       @relation(fields: [user_id], references: [id])
   player_status    String
+  current_time     Int        @default(600)
 
   gameplaydetail   GamePlayDetail[]
 }

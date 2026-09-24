@@ -38,6 +38,7 @@ export default async function StartPage({params}: ParamPageProps){
         async function startGamePlay(){
             "use server";
 
+            //gameplayの画面をたくさん開いたら開くたびにgameplayIdが増えていっている
             const gamePlay = await prisma.gamePlay.create({
                 data: {
                     user_id: Number(userId),

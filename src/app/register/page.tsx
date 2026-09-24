@@ -12,6 +12,7 @@ export default function UserRegister(){
         const user_name =formData.get("user_name") as string;
         const password = formData.get("password") as string;
 
+        
         //ユーザーの重複がないかの確認
         const existingUser = await prisma.user.findUnique({
             where:{
