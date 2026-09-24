@@ -100,16 +100,44 @@ export default async function GameStart({params}: Props){
     async function selectTask(formData: FormData){
         "use server";
 
+
         const selectedGameplayId = Number(formData.get("gameplay_id"));
         const taskId = Number(formData.get("task_id"));
+        const duration = Number(formData.get("duration"));
+
+        //currenttimeを取ってくるためのfind
+        const currentGameplay = await prisma.gamePlay.findUnique({
+            where:{ id: selectedGameplayId},
+        })
+
+        //currentGamePlayがないからnullで返します
+        if(!currentGameplay){return;}
+
+        const startTime = currentGameplay.current_time;
+        const endTime = startTime + duration;
+
+        let overtimeHours = 0;
+
+        if(startTime >= 1140){
+            overtimeHours = duration;
+            //なんで途中から超えたかどうかがendTime > 1140でわかるの？
+        } else if(endTime > 1140) {
+            overtimeHours = endTime - 1140;
+        }
         
+        //最後、終わった時間を表すendをcurrent_timeに入れる
+        await prisma.gamePlay.update({
+            where:{id: selectedGameplayId},
+            data: {current_time: endTime},
+        });
         
 
         await prisma.gamePlayDetail.create({
             data: {
                 gameplay_id: selectedGameplayId,
-                task_id: taskId
-
+                task_id: taskId,
+                overtime_hours: overtimeHours,
+                when_overtime_happen: new Date(),
             },
         });
 
