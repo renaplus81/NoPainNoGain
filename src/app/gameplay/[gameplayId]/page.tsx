@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 type Props = {
     params: Promise<{gameplayId: string}>
@@ -35,12 +36,18 @@ export default async function GameStart({params}: Props){
         },
     });
 
+    //useridがない元々登録されているタスクも表示したいので追加
+    const commonTasks = await prisma.task.findMany({
+        where: {
+            user_id:null
+        }
+    })
 
 
     //gameplay画面開けているかどうかの確認。
-    //  console.log(gameplay);
+     console.log(gameplay);
     //[object]の中身を見たい↓
-     console.log(JSON.stringify(gameplay, null, 2));
+    //  console.log(JSON.stringify(gameplay, null, 2));
 
 
     //uniqueなのでもしない場合に、gameplayが作られていないことをお知らせ
@@ -49,9 +56,14 @@ export default async function GameStart({params}: Props){
     //ここまで口頭ディフェンス範囲
 
 
+    //nullも表示させたくて追加
+    const allTasks = [...gameplay.user.playerstask, ...commonTasks];
+
+
     //ここは、一旦全部のタスクと完了しているタスクを照らし合わせて未着手のものを抽出している。
     //taskが型推論というなら、じゃあtaskに1件もなかったら型推論できないということですか
-    const availableTasks = gameplay.user.playerstask.filter((task) => {
+    const availableTasks = allTasks.filter((task) => {
+
 
             const isCompleted = gameplay.gameplaydetail.some(
                 (detail) => detail.task_id === task.id
@@ -61,7 +73,9 @@ export default async function GameStart({params}: Props){
             return !isCompleted;   
         });
 
-        console.log(availableTasks)
+        // console.log(availableTasks)
+
+
 
 
 //フィッシャーイェーツというデータや配列を偏りなく完全にランダムに並び替えるためのアルゴリズム
@@ -90,8 +104,8 @@ export default async function GameStart({params}: Props){
 
     //上のランダム関数をつかってタスクを表示させる処理
 
-    //ここって引数これだけでcountとか伝わるのかな
-    const appearTasks = pickRondomTasks(availableTasks, 3);
+        //ここって引数これだけでcountとか伝わるのかな
+        const appearTasks = pickRondomTasks(availableTasks, 3);
 
 
 
@@ -141,8 +155,9 @@ export default async function GameStart({params}: Props){
             },
         });
 
+        //今のページのパスを呼び出して更新する。
+        revalidatePath("/gameplay/page.tsx" + selectedGameplayId);
     }
-
 
 
 
