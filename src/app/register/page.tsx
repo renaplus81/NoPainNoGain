@@ -2,6 +2,9 @@ import {prisma} from "@/lib/prisma";
 import {redirect} from "next/navigation";
 import Link from "next/link";
 
+import bcrypt from 'bcryptjs';
+
+
 //新規会員登録するserver action
 //<form action={}>に渡すことでフォーム送信時にサーバー側で実行される
 
@@ -11,6 +14,7 @@ export default function UserRegister(){
 
         const user_name =formData.get("user_name") as string;
         const password = formData.get("password") as string;
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         
         //ユーザーの重複がないかの確認
@@ -30,7 +34,7 @@ export default function UserRegister(){
         const user = await prisma.user.create({
             data:{
                 user_name,
-                password,
+                hashedPassword,
             },
         });
         redirect(`/start/${user.id}`);

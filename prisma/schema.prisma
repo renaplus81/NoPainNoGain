@@ -13,11 +13,11 @@ datasource db {
 }
 
 model User{
-  id           Int         @id @default(autoincrement())
-  user_name    String      @unique
-  password     String      @unique
-  createdAt    DateTime    @default(now())
-
+  id                 Int         @id @default(autoincrement())
+  user_name          String      @unique
+  hashedPassword     String      
+  createdAt          DateTime    @default(now())
+  
   onegame      GamePlay[]
   playerstask  Task[]
 }
