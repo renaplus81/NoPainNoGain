@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 
 export default function LoginPage(){
     async function loginUser(formData: FormData){
@@ -29,7 +30,12 @@ export default function LoginPage(){
         const isValid = await bcrypt.compare(password, user.hashedPassword);
 
 
-        if(isValid){
+
+
+        if(isValid){        //ここにクッキーの書き込み追加するらしい(ログインできるかどうか判断しているから)
+            const cookieStore = await cookies();
+            cookieStore.set("useId", String(user.id));
+
             redirect(`/start/${user.id}`);
         }else{
             redirect(`/login`);
