@@ -79,10 +79,14 @@ export default async function GameStart({params}: Props){
 //フィッシャーイェーツというデータや配列を偏りなく完全にランダムに並び替えるためのアルゴリズム
 
     //タスクを3つランダムに取り出すためにここでごちゃ混ぜリスト？にしている
-    //taskとcountがエラーになるのはなんでだろう→型が指定されていないからでした(修正ずみ)
-    //→→型指定しました。tasksは上の関数のtaskの型推論を直接参照して、countは単純にnumberにしました
+    //型指定しました。tasksは上の関数のtaskの型推論を直接参照して、countは単純にnumberにしました.
     function pickRondomTasks(tasks: typeof availableTasks, count:number){
-        //copyするのは、spliceを使って直接taskの中身をいじっているからコピーしないといけない
+        if(count > tasks.length) {
+            count = tasks.length;
+        }
+
+
+        //copyするのは、spliceを使って直接taskの中身をいじってしまうことになるからコピーしないといけない
         //jsの性質として、オブジェクトや配列は参照で渡される、というため
         const copy = [...tasks];
         const result = [];
@@ -100,13 +104,14 @@ export default async function GameStart({params}: Props){
         return result;
     }
 
-    //上のランダム関数をつかってタスクを表示させる処理
 
+
+
+    //上のランダム関数をつかってタスクを表示させる処理
         //ここって引数これだけでcountとか伝わるのかな
         const appearTasks = pickRondomTasks(availableTasks, 3);
 
-
-
+        
 
 
 
