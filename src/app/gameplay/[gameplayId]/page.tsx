@@ -110,6 +110,12 @@ export default async function GameStart({params}: Props){
 
 
 
+
+
+
+
+
+
     //タスクを選択する
     async function selectTask(formData: FormData){
         "use server";
@@ -123,6 +129,30 @@ export default async function GameStart({params}: Props){
         const currentGameplay = await prisma.gamePlay.findUnique({
             where:{ id: selectedGameplayId},
         })
+
+
+        //オールディーテールズ
+        //残業時間(overtimehours)と理不尽指数計算(irrational: taskテーブルなのでinclude)
+        const allDetails = await prisma.gamePlayDetail.findMany({
+            where: {gameplay_id: selectedGameplayId},
+            include:{
+                task:true,
+            }
+        })
+
+
+        
+        //the total amount of shachiku point
+        //alldetails(配列)の中身を1件ずつみながら社畜ポイントを足し合わせている。
+        let totalPoints = 0;
+
+        for (const detail of allDetails){
+            totalPoints = totalPoints + detail.overtime_hours * detail.task.irrational;
+        }
+
+
+
+
 
         //currentGamePlayがないからnullで返します
         if(!currentGameplay){return;}
@@ -166,7 +196,7 @@ export default async function GameStart({params}: Props){
 
 
         
-        //2２時で次の日になる計算にelseで処理できるように書いたため、ここ入らなくなった
+        //2２時で次の日になる計算にelseで処理できるように書いたため、ここいらなくなった
         // //最後、終わった時間を表すendをcurrent_timeに入れる
         // await prisma.gamePlay.update({
         //     where:{id: selectedGameplayId},
