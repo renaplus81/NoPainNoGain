@@ -2,6 +2,8 @@ import {prisma} from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import bcrypt from "bcryptjs";
+
 export default function LoginPage(){
     async function loginUser(formData: FormData){
         "use server";
@@ -10,18 +12,29 @@ export default function LoginPage(){
         const user_name=formData.get("user_name") as string;
         const password=formData.get("password") as string;
 
+
         const user = await prisma.user.findFirst({
             where:{
                 user_name:user_name,
-                password:password,
+                // password:password,
             },
         })
 
-        if(user){
+
+        if(!user){
+            redirect(`/login`); //ユーザーが見つからない場合
+        }
+
+        //user.をつけ忘れてエラーになっていた
+        const isValid = await bcrypt.compare(password, user.hashedPassword);
+
+
+        if(isValid){
             redirect(`/start/${user.id}`);
         }else{
             redirect(`/login`);
         }
+
     }
 
     return(
@@ -53,6 +66,13 @@ export default function LoginPage(){
                     <button type="submit">
                         ログインする
                     </button>
+
+                    <p>
+                        <Link href={`/register`}>
+                            初めて遊ぶ方はこちら
+                        </Link>
+                    </p>
+
 
                 </form>
             </div>
