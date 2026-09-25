@@ -45,7 +45,6 @@ export default async function StartPage({params}: ParamPageProps){
                     player_status: "プレイ中",
                 },
             });
-
             redirect(`/gameplay/${gamePlay.id}`);
         }
 
