@@ -9,31 +9,23 @@ type Props = {
 export default async function GameStart({params}: Props){
 
     const {gameplayId} = await params;
-
     const gameplay = await prisma.gamePlay.findUnique({
-        where: {id: Number(gameplayId)},
-        //includeをどうしよう。
-        //ゲーム詳細とタスクをjoinさせるべきかな？
-        
-        include:{
-            gameplaydetail: true,
 
-                //間違っていた自分で書いたversion
-                // include:{
-                //     user:{
-                //         include:{
-                //             onegame:true,
-                //             playerstask: true,
-                //         }},
-                //     }
-                //includeは1つのモデルに対して1つだけ書く！
-                
+        //ポイントを画面に表示させるためにtaskをincludeさせました。
+        where: {id: Number(gameplayId)},
+
+        include:{
+            gameplaydetail:{
+                include: {
+                    task: true,
+                },
+            },         
                 user:{
                     include:{
                         playerstask: true,
                     },
                 },
-        },
+            },
     });
 
     //useridがない元々登録されているタスクも表示したいので追加
@@ -45,19 +37,25 @@ export default async function GameStart({params}: Props){
 
 
     //gameplay画面開けているかどうかの確認。
-     console.log(gameplay);
+    //  console.log(gameplay);
     //[object]の中身を見たい↓
     //  console.log(JSON.stringify(gameplay, null, 2));
 
 
+    //findUniqueの結果によって処理を止める。
     //uniqueなのでもしない場合に、gameplayが作られていないことをお知らせ
     //nullの可能性があるものを直接使おうとして今後何かしらエラーが発生しないように。
     if(!gameplay) notFound();
-    //ここまで口頭ディフェンス範囲
+    ////////////////////////////ここまで口頭ディフェンス範囲
 
 
-    //nullも表示させたくて追加
+    //user_idがnullもタスク選択表示させたくて追加
     const allTasks = [...gameplay.user.playerstask, ...commonTasks];
+
+
+
+
+
 
 
     //ここは、一旦全部のタスクと完了しているタスクを照らし合わせて未着手のものを抽出している。
@@ -115,15 +113,19 @@ export default async function GameStart({params}: Props){
 
 
 
+    //-----selectTask-----selectTask-----selectTask-----selectTask-----//
 
     //タスクを選択する
     async function selectTask(formData: FormData){
         "use server";
 
 
+        //ここの関数で使うためにフォームから取り出してるわよ
         const selectedGameplayId = Number(formData.get("gameplay_id"));
         const taskId = Number(formData.get("task_id"));
         const duration = Number(formData.get("duration"));
+        const irrational = Number(formData.get("irrational"));
+
 
         //currenttimeを取ってくるためのfind
         const currentGameplay = await prisma.gamePlay.findUnique({
@@ -131,79 +133,116 @@ export default async function GameStart({params}: Props){
         })
 
 
-        //オールディーテールズ
+
+    //currentGamePlayがないからnullで返します
+        if(!currentGameplay){return;}
+
+
+        //社畜ポイントの合計を計算
+
+        //オールディーテールズ(過去に選んだタスクの記録だけ)
         //残業時間(overtimehours)と理不尽指数計算(irrational: taskテーブルなのでinclude)
         const allDetails = await prisma.gamePlayDetail.findMany({
             where: {gameplay_id: selectedGameplayId},
-            include:{
-                task:true,
-            }
+            include:{task:true,}
         })
 
 
-        
-        //the total amount of shachiku point
-        //alldetails(配列)の中身を1件ずつみながら社畜ポイントを足し合わせている。
-        let totalPoints = 0;
 
-        for (const detail of allDetails){
-            totalPoints = totalPoints + detail.overtime_hours * detail.task.irrational;
-        }
+
+        //22時に到達した場合の次の回数(newOvertimeDays)を先に計算
+        const newOvertimeDays = currentGameplay.overtime_days + 1;
 
 
 
 
-
-        //currentGamePlayがないからnullで返します
-        if(!currentGameplay){return;}
-
+        //タスク始まりの時間と終わりの時間を計算。
         const startTime = currentGameplay.current_time;
         const endTime = startTime + duration;
+
+
+
+
+
 
         let overtimeHours = 0;
 
         //1140は19時
         if(startTime >= 1140){
             overtimeHours = duration;
-            //なんで途中から超えたかどうかがendTime > 1140でわかるの？
+            //19時までの９時間が1140なのでそれを超えたら19時になるのがわかります、
         } else if(endTime > 1140) {
             overtimeHours = endTime - 1140;
         }
+    
 
 
 
 
-        //22時で次の日になる計算(1320は22時)
+        //alldetails(配列)の中身を1件ずつみながら社畜ポイントを足し合わせている。
+        let totalPoints = 0;
+        //detail of allDetails のdetailってここで決めた変数？ofとは。
+                //→→配列の中身を1個ずつdetailという名前で取り出しながら繰り返すという構文。(過去の記録を処理するためにループ文を使って取り出している)
+        for (const detail of allDetails){
+            totalPoints = totalPoints + detail.overtime_hours * detail.task.irrational; 
+        }
+        //これなんのtotalPointsなんだろう？
+                //1個目が過去に選んだタスクの社畜ポイント、これが今回選んだタスクの社畜ポイン戸
+        totalPoints = totalPoints + overtimeHours * irrational;
+
+
+    
+
+        
+
+            //ポイントによって死ぬか生き残るかを決める
+                let newStatus = "プレイ中"; //仮にプレイ中とおく(newStatusがエラーになるから(?))
+
+                if(totalPoints >= 100){
+                    newStatus = "過労死";
+                } else if (endTime >= 1320 && newOvertimeDays >= 5) {
+                    newStatus = "クリア";
+                }
+                //どちらでもなければnewStatusは最初のプレイ中のまま
+
+
+
+
+
+        //22時で次の日になる計算(🕙1320は22時)
         //追加：22時が5回きたらクリア判定
         if(endTime >= 1320) {
 
-            const newOvertimeDays = currentGameplay.overtime_days + 1;
+            //移動
+            // const newOvertimeDays = currentGameplay.overtime_days + 1;
+
+                //gameplay を更新する(1回だけ)
 
                 await prisma.gamePlay.update({
                     where: {id: selectedGameplayId},
                     data:{
                         current_time: 600,
                         overtime_days: newOvertimeDays,
-                        player_status: newOvertimeDays >= 5 ? "クリア" : "プレイ中",
+                        player_status: newStatus,
                     },
                 });
+
                 } else {
                     await prisma.gamePlay.update({
                         where:{id: selectedGameplayId},
-                        data: {current_time: endTime},
+                        data: {current_time: endTime, player_status: newStatus,},
+            
                     });
                 }
 
 
         
-        //2２時で次の日になる計算にelseで処理できるように書いたため、ここいらなくなった
-        // //最後、終わった時間を表すendをcurrent_timeに入れる
-        // await prisma.gamePlay.update({
-        //     where:{id: selectedGameplayId},
-        //     data: {current_time: endTime},
-        // });
-        
 
+
+
+
+
+        //gameplayを新規作成する(このタスクを選んだ記録として新しい1行として保存する)
         await prisma.gamePlayDetail.create({
             data: {
                 gameplay_id: selectedGameplayId,
@@ -213,14 +252,38 @@ export default async function GameStart({params}: Props){
             },
         });
 
+
+
         //今のページのパスを呼び出して更新する。(コンポーネント関数の再実行)
         revalidatePath("/gameplay/" + selectedGameplayId);
+
+
+
     }
+
+    //⬆️ここまでselectTaskの関数
+
+
+    // -----selectTask-----selectTask-----selectTask-----selectTask-----
+
+
+
+
+
+
+
 
 
 
     //⭐️⭐️⭐️コンソールで確認したくでclaudeに出してもらった
-    console.log("現在時刻(分):", gameplay.current_time, "22時到達回数:", gameplay.overtime_days);
+    console.log("現在時刻(分):", gameplay.current_time, "22時到達回数:", gameplay.overtime_days, "ステータス:", gameplay.player_status);
+
+
+    //画面にトータルポイントを表示させるために、ここに処理を書きました。
+    let totalPoints = 0;
+    for (const detail of gameplay.gameplaydetail){
+        totalPoints = totalPoints + detail.overtime_hours * detail.task.irrational;
+    }
 
 
 
@@ -228,24 +291,38 @@ export default async function GameStart({params}: Props){
 
     return(
         <div>
-            <div>${}日目の</div>
+            <div>{gameplay.overtime_days + 1}日目の</div>
+            <div>社畜ポイント:{totalPoints}</div>
 
-                <div>
-                    {appearTasks.map((task) => (
-                        <form key={task.id} action={selectTask}>
-                            
-                            <input type="hidden" name="gameplay_id" value={gameplay.id}/>
-                            <input type="hidden" name="task_id" value={task.id}/>
-                            <input type="hidden" name="duration" value={task.duration}/>
-                            <input type="hidden" name="irrational" value={task.irrational}/>
 
-                            <span>{task.task_name}</span>
-                            <button type="submit">このタスクを選ぶ</button>
-                            
-                        </form>
+                {gameplay.player_status !== "プレイ中" ? (
+                    <div>
+                        {gameplay.player_status === "過労死" ? (
+                            <p>過労死しましたね</p>
+                        ):(
+                            <p>クリアしました。</p>
                         
-                    ))}
-                </div>
+                        )}
+                    </div>
+                ):(
+                        <div>
+                            {appearTasks.map((task) => (
+                                <form key={task.id} action={selectTask}>
+                                    
+                                    <input type="hidden" name="gameplay_id" value={gameplay.id}/>
+                                    {/* 選択可能な登録タスクが3件未満の場合はここでエラーになります。 */}
+                                    <input type="hidden" name="task_id" value={task.id}/>
+                                    <input type="hidden" name="duration" value={task.duration}/>
+                                    <input type="hidden" name="irrational" value={task.irrational}/>
+
+                                    <span>{task.task_name}</span>
+                                    <button type="submit">このタスクを選ぶ</button>
+                                    
+                                </form>
+                                
+                            ))}
+                        </div>
+                )}
             
                 {/* <form action={次の日に移動する関数とポイント計算関数？}> */}
 
