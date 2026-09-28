@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+
+import { cookies } from "next/headers";
 
 type Props = {
     params: Promise<{gameplayId: string}>
@@ -47,6 +49,18 @@ export default async function GameStart({params}: Props){
     //nullの可能性があるものを直接使おうとして今後何かしらエラーが発生しないように。
     if(!gameplay) notFound();
     ////////////////////////////ここまで口頭ディフェンス範囲
+
+
+
+    //ログイン中のユーザーが、このゲームの持ち主かどうか確認する
+    const cookieStore = await cookies();
+    const loggedInUserId = cookieStore.get("userId")?.value;
+
+    if(!loggedInUserId || Number(loggedInUserId) !== gameplay.user_id){
+        redirect("/login");
+    }
+
+
 
 
     //user_idがnullもタスク選択表示させたくて追加
@@ -142,6 +156,14 @@ export default async function GameStart({params}: Props){
     //currentGamePlayがないからnullで返します
         if(!currentGameplay){return;}
 
+        const cookieStore = await cookies();
+        const loggedInUserId = cookieStore.get("userId")?.value;
+
+        if(!loggedInUserId || Number(loggedInUserId) !== currentGameplay.user_id){
+            return;
+        }
+
+        
 
         //社畜ポイントの合計を計算
 
@@ -296,7 +318,7 @@ export default async function GameStart({params}: Props){
 
     return(
         <div>
-            <div>{gameplay.overtime_days + 1}日目の</div>
+            <div>{gameplay.overtime_days + 1}日目</div>
             <div>社畜ポイント:{totalPoints}</div>
 
 

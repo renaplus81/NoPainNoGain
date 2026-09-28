@@ -34,7 +34,7 @@ export default function LoginPage(){
 
         if(isValid){        //ここにクッキーの書き込み追加するらしい(ログインできるかどうか判断しているから)
             const cookieStore = await cookies();
-            cookieStore.set("useId", String(user.id));
+            cookieStore.set("userId", String(user.id));
 
             redirect(`/start/${user.id}`);
         }else{

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import {cookies} from "next/headers";
+
 
 type ParamPageProps = {
    params: Promise<{userId: string}>
@@ -11,6 +13,17 @@ type ParamPageProps = {
 export default async function StartPage({params}: ParamPageProps){
 
    const {userId} = await params;
+
+                        //🍪//🍪//🍪//🍪//🍪//🍪//🍪//🍪
+                        //クッキーを確認する
+                            const cookieStore = await cookies();
+                            const loggedInUserId = cookieStore.get("userId")?.value;
+                        //クッキーがない、またはURLのuserIdと一致しない場合はログイン画面に戻す
+                            if (!loggedInUserId || loggedInUserId !== userId) {
+                                redirect("/login");
+                            }
+
+
 
     //ユーザーidを取得しているserver action
 
@@ -38,7 +51,25 @@ export default async function StartPage({params}: ParamPageProps){
         async function startGamePlay(){
             "use server";
 
-            //gameplayの画面をたくさん開いたら開くたびにgameplayIdが増えていっている
+                            //🍪//🍪//🍪//🍪//🍪//🍪//🍪//🍪
+                            //すでにプレイ中のGameplayがないか先に探す
+                            const existingGamePlay = await prisma.gamePlay.findFirst({
+                                where:{
+                                    user_id: Number(userId),
+                                    player_status: "プレイ中",
+                                },
+                            });
+
+                            //あればそれを使い回す
+                            if(existingGamePlay){
+                                redirect(`/gameplay/${existingGamePlay.id}`);
+                            }
+
+
+
+                        //⬇️なければ新規作成する処理は元々入っていました〜
+
+            //gameplayの画面をたくさん開いたら開くたびにgameplayIdが増えていっている(→→cookieで解決中)
             const gamePlay = await prisma.gamePlay.create({
                 data: {
                     user_id: Number(userId),
