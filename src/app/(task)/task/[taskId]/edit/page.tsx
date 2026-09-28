@@ -4,6 +4,8 @@ import {prisma} from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 
+import { getLoggedInUserId } from "@/lib/auth";
+
 type Props = {
     params: Promise<{taskId : string}>;
 };
@@ -30,6 +32,16 @@ export default async function TaskEditPage({params}: Props){
     //task.task_namがnullの可能性があるものを直接使おうとしているから(findUniqueだし)
     if(!task) notFound();
 
+    const loggedInUserId = await getLoggedInUserId();
+
+    if(loggedInUserId === null){
+        redirect("/login");
+    }
+    if(task.user_id !== loggedInUserId){
+        notFound();
+    }
+
+
 
     async function updateTask(formData: FormData){
         "use server";
@@ -38,6 +50,12 @@ export default async function TaskEditPage({params}: Props){
         //絶対にnullではないと判断してくれるようになる
         // redirect(`/alltask/${task.user_id}`);のtaskがエラーだったため　(1こうえのnotfoundで説明)
         if(!task) notFound();
+
+        const loggedInUserId = await getLoggedInUserId();
+        if(loggedInUserId === null || task.user_id !== loggedInUserId){
+            return;
+        }
+
 
         //多分useridも撮らなくちゃいけないけどどうしよう
         const id = Number(taskId);
@@ -61,7 +79,7 @@ export default async function TaskEditPage({params}: Props){
         //エラーでてmす
         //userIdつけたいのに、無理だー多分上でやるんだろうな
         //notfoundをつけたら直りました。
-        redirect(`/alltask/${task.user_id}`);
+        redirect(`/alltask/${loggedInUserId}`);
     }
 
     return(

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import {cookies} from "next/headers";
+import { getLoggedInUserId } from "@/lib/auth";
 
 
 type ParamPageProps = {
@@ -15,13 +16,18 @@ export default async function StartPage({params}: ParamPageProps){
    const {userId} = await params;
 
                         //🍪//🍪//🍪//🍪//🍪//🍪//🍪//🍪
-                        //クッキーを確認する
-                            const cookieStore = await cookies();
-                            const loggedInUserId = cookieStore.get("userId")?.value;
-                        //クッキーがない、またはURLのuserIdと一致しない場合はログイン画面に戻す
-                            if (!loggedInUserId || loggedInUserId !== userId) {
-                                redirect("/login");
-                            }
+                        // //クッキーを確認する
+                        //     const cookieStore = await cookies();
+                        //     const loggedInUserId = cookieStore.get("userId")?.value;
+                        // //クッキーがない、またはURLのuserIdと一致しない場合はログイン画面に戻す
+                        //     if (!loggedInUserId || loggedInUserId !== userId) {
+                        //         redirect("/login");
+                        //     }
+                        const loggedInUserId = await getLoggedInUserId();
+
+                        if(loggedInUserId !== Number(userId)){
+                            redirect("/login");
+                        }
 
 
 
@@ -84,9 +90,9 @@ export default async function StartPage({params}: ParamPageProps){
 
    return (
     <div>
-        <div>
+        {/* <div>
             <p>tst</p>
-        </div>
+        </div> */}
 
         <div>
             <Link href={`/login`}>
@@ -94,17 +100,20 @@ export default async function StartPage({params}: ParamPageProps){
             </Link>
         </div>
 
-
-        <h1>{user?.user_name}</h1>
+{/* 
+        <h1>{user?.user_name}</h1> */}
 
         <section>
-            <h2>スタート画面</h2>
+            <h2>ここはスタート画面</h2>
+            <br></br>
             <table>
                 <tbody>
                     <tr>
-                        <th>ユーザー名</th>
+                        <td>ユーザー名: </td>
                         <td>{user?.user_name}</td>
                     </tr>
+
+                    
 
                     {/* ここよくわからない */}
                     {/* .mapは配列にしか使えないオブジェクト */}
@@ -118,6 +127,8 @@ export default async function StartPage({params}: ParamPageProps){
                 </tbody>
             </table>
         </section>
+
+        <br></br>
 
         {/* redirectがstartGamePlay関数の中にあるので、Linkタグではない。
         submitでcreateしたgameplayをredirect先に送っている？ 

@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
+import {getLoggedInUserId} from "@/lib/auth";
+
 
 type Props = {
     params: Promise<{gameplayId: string}>
@@ -53,12 +55,20 @@ export default async function GameStart({params}: Props){
 
 
     //ログイン中のユーザーが、このゲームの持ち主かどうか確認する
-    const cookieStore = await cookies();
-    const loggedInUserId = cookieStore.get("userId")?.value;
+    // const cookieStore = await cookies();
+    // const loggedInUserId = cookieStore.get("userId")?.value;
 
-    if(!loggedInUserId || Number(loggedInUserId) !== gameplay.user_id){
+    // if(!loggedInUserId || Number(loggedInUserId) !== gameplay.user_id){
+    //     redirect("/login");
+    // }
+
+    //auth.tsに書いた関数を呼び出してcookieを読む処理をしてる
+    const loggedInUserId = await getLoggedInUserId();
+
+    if(loggedInUserId !== gameplay.user_id){
         redirect("/login");
     }
+
 
 
 
@@ -154,16 +164,16 @@ export default async function GameStart({params}: Props){
 
 
     //currentGamePlayがないからnullで返します
+    //ここもauth.tsのcookieを読む処理を呼び出しているので編集した
         if(!currentGameplay){return;}
 
-        const cookieStore = await cookies();
-        const loggedInUserId = cookieStore.get("userId")?.value;
+        const loggedInUserId = await getLoggedInUserId();
 
-        if(!loggedInUserId || Number(loggedInUserId) !== currentGameplay.user_id){
+        if(loggedInUserId !== currentGameplay.user_id){
             return;
         }
 
-        
+
 
         //社畜ポイントの合計を計算
 
@@ -343,7 +353,7 @@ export default async function GameStart({params}: Props){
                                     <input type="hidden" name="irrational" value={task.irrational}/>
 
                                     <span>{task.task_name}</span>
-                                    <button type="submit">このタスクを選ぶ</button>
+                                    <button type="submit">　　　　←このタスクを選ぶ</button>
                                     
                                 </form>
                                 

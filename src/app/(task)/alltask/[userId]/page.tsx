@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import DeleteTask from "../_components/DeleteTask";
 
+import { getLoggedInUserId } from "@/lib/auth";
+
 type Props = {
     params: Promise<{userId: string}>;
 };
@@ -12,23 +14,64 @@ type Props = {
 export default async function TaskList({params}: Props){
     const {userId} = await params;
 
-    //読み込みアシンク
-    const allTasks = await prisma.task.findMany({
+
+    //ページ本体の照合
+    const loggedInUserId = await getLoggedInUserId();
+        if(loggedInUserId !== Number(userId)){
+            redirect("/login");
+        }
+
+
+
+        //一覧表示--------------------------------
+
+    //読み込みアシンク(userIdで作られたやつ)
+    const myTasks = await prisma.task.findMany({
         where:{ user_id : Number(userId)},
         orderBy:{ id: "desc" },
     });
+
+    //userid nullのタスク
+    const commonTasks = await prisma.task.findMany({
+        where:{ user_id: null },
+    });
+
+    const allTasks = [...myTasks, ...commonTasks];
+
+         //一覧表示--------------------------------
+
+
+
 
     //削除アシンク
     async function deleteTask(formData: FormData){
         "use server"
 
+        //cookie追加
+        const loggedInUserId = await getLoggedInUserId();
+        if(loggedInUserId === null){
+            return;
+        }
+
         // if(!task) notFound();
 
         const taskId = Number(formData.get("taskId"));
 
+
+        //削除対象のタスクをとり、持ち主が自分か確認する
+        const target = await prisma.task.findUnique({
+            where: {id: taskId},
+        });
+        if(!target || target.user_id !== loggedInUserId){
+            return;
+        }
+
+
         await prisma.task.delete({
             where: {id: taskId},
         });
+
+
         redirect(`/alltask/${userId}`);
     }
 
@@ -68,6 +111,12 @@ export default async function TaskList({params}: Props){
                                    
                                     <td>{task.irrational}</td> 
 
+                        {/* 共通のタスクを編集されないように */}
+                        {task.user_id === null ? (
+                            <td>共通タスク(編集不可)</td>
+                        ):(
+                            <>
+                        
                                     <td>
                                     <DeleteTask taskId={task.id} deleteAction={deleteTask}/>
                                     </td>
@@ -82,6 +131,7 @@ export default async function TaskList({params}: Props){
                                         ※ 　.mapはそのための仕組みを提供している。　　*/}
                                     <Link href={`/task/${task.id}/edit`}>編集</Link>
                                     </td>
+                                </>)}
                             </tr>
                         ))}
                     </tbody>
@@ -91,8 +141,8 @@ export default async function TaskList({params}: Props){
             <p>現在{allTasks.length}件  のタスクが登録されています。</p>
             
             <div>
-                {/* まだ作成していないのでリンク名は仮 */}
-                <Link href={`/gameplay/${userId}`}>ゲームをプレイする</Link>
+                {/*  */}
+                <Link href={`/start/${userId}`}>ゲームをプレイする</Link>
             </div>
 
         </div>

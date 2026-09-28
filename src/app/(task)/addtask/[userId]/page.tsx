@@ -2,20 +2,36 @@ import {prisma} from "@/lib/prisma";
 import {redirect} from "next/navigation";
 import Link from "next/link";
 
+import { getLoggedInUserId } from "@/lib/auth";
+
 //タスクの新規追加
 
 type Props = {
     params: Promise<{ userId: string }>;
 };
 
-export default function RegisterNewTask({params}:Props){
+export default async function RegisterNewTask({params}:Props){
+        const { userId } = await params;
+
+        //ログイン中のユーザーとURLのuserIdが一致するか確認する
+        const loggedInUserId = await getLoggedInUserId();
+        if(loggedInUserId !== Number(userId)){
+            redirect("/login");
+        }
 
     async function RegisterTask(formData:FormData){
         "use server";
-        const { userId } = await params;
+
+        //Serveractionは外から直接呼べるのでここでも確認する
+        //user_idはURLではなく、ログイン中のユーザーIDから決める(元もとNumber(userId);だったため)
+        const currentUserId = await getLoggedInUserId();
+        if(currentUserId === null){
+            return;
+        }
+
 
         //paramsからとったuserIdがあるので、それを使う。
-        const user_id = Number(userId);
+        const user_id = currentUserId;
         //as stringは、ある値が確実に文字列(string)型であることをコンパイラに保証するため
         const task_name = formData.get("task_name") as string;
         //Number()を追加、フォーム入力のものは文字列型で返ってくるため
@@ -25,12 +41,14 @@ export default function RegisterNewTask({params}:Props){
         const makesureTitle = await prisma.task.findFirst({
             where:{ 
                 task_name: task_name,
+                user_id: user_id,
             },
         });
 
+
+
         if(makesureTitle){
-            redirect(`/alltask`)
-            //　まだタスク編集画面一覧を作っていないため一旦仮のURL →OK
+            redirect(`/alltask/${user_id}`);
         }
 
         const createTask = await prisma.task.create({
@@ -43,14 +61,15 @@ export default function RegisterNewTask({params}:Props){
         });
 
         
-        redirect(`/alltask/${userId}`)
-            //　まだタスク編集画面一覧を作っていないため一旦仮のURL →OK
+        redirect(`/alltask/${user_id}`);
     }
 
     return (
+        // ここのuser_idがえらー
+        //タスク登録しているのに表示されない
         <div>
-            <Link href="/">
-            {/* まだタスク編集画面一覧を作っていないため一旦仮のURL */}
+            <Link href={`/alltask/${userId}`}>
+            {/*  */}
             ←タスク一覧画面へ
             </Link>
 
