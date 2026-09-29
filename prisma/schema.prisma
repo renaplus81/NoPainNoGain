@@ -20,6 +20,7 @@ model User{
   
   onegame      GamePlay[]
   playerstask  Task[]
+  sessions     Session[]
 }
 
 model GamePlay{
@@ -53,4 +54,11 @@ model GamePlayDetail{
   when_overtime_happen  DateTime
   
   @@id([gameplay_id, task_id])
+}
+
+model Session{
+  id           String     @id @default(uuid())
+  user_id      Int
+  user         User       @relation(fields: [user_id], references: [id])
+  expiresAt    DateTime
 }

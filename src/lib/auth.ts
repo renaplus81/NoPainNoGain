@@ -12,5 +12,4 @@ export async function getLoggedInUserId(){
     }
     //
     return Number(value);
-
 }
