@@ -152,14 +152,16 @@ export default async function GameStart({params}: Props){
         //ここの関数で使うためにフォームから取り出してるわよ
         const selectedGameplayId = Number(formData.get("gameplay_id"));
         const taskId = Number(formData.get("task_id"));
-        const duration = Number(formData.get("duration"));
-        const irrational = Number(formData.get("irrational"));
+
 
 
         //currenttimeを取ってくるためのfind
         const currentGameplay = await prisma.gamePlay.findUnique({
             where:{ id: selectedGameplayId},
         })
+
+
+    
 
 
 
@@ -172,6 +174,49 @@ export default async function GameStart({params}: Props){
         if(loggedInUserId !== currentGameplay.user_id){
             return;
         }
+
+        //hidden input対策？のうちの一つ
+        //ステータスがプレイ中ではないなら、それ以上タスクを選ばせる必要がない
+        if(currentGameplay.player_status !== "プレイ中"){
+            return;
+        }
+
+
+
+
+
+
+
+
+        //フォームのhidden inputは書き換えられるので、task_idだけを信用し、
+        //duration・irrationalはDBから読み直す(このあとの計算で使う)
+        const selectedTask = await prisma.task.findUnique({
+            where:{id: taskId},
+        });
+        if(!selectedTask){return;}
+
+        //他人のタスクのidを送られた場合の対策
+        //自分のタスク、または共通タスクでなければ、選ばせない
+        if(selectedTask.user_id !== loggedInUserId && selectedTask.user_id !== null){
+            return;
+        }
+
+        //ここまででselectedTaskが存在していて、自分か共通のタスクてあることが保証された
+
+
+
+
+        //durationとirrationalをフォームデータからではなく、DBから取り直したselectedTaskの値にした。
+        //(irrationalを0に書き換えて送るとか言った不正ができなくなる)
+        const duration = selectedTask.duration;
+        const irrational = selectedTask.irrational;
+
+
+
+
+
+
+
 
 
 
@@ -300,7 +345,7 @@ export default async function GameStart({params}: Props){
 
     //⬆️ここまでselectTaskの関数
 
-
+    
     // -----selectTask-----selectTask-----selectTask-----selectTask-----
 
 
