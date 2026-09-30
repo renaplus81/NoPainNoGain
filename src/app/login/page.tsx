@@ -33,8 +33,18 @@ export default function LoginPage(){
 
 
         if(isValid){        //ここにクッキーの書き込み追加するらしい(ログインできるかどうか判断しているから)
+            //さらにセッションを追加
+            const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 1000);
+
+            const session = await prisma.session.create({
+                data:{
+                    user_id: user.id,
+                    expiresAt: expiresAt,
+                },
+            });
+
             const cookieStore = await cookies();
-            cookieStore.set("userId", String(user.id));
+            cookieStore.set("sessionId", session.id);
 
             redirect(`/start/${user.id}`);
         }else{
