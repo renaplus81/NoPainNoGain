@@ -3,6 +3,6 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
-  esbuild: false
+  esbuild: true
   msgpackr-extract: false
   workerd: false

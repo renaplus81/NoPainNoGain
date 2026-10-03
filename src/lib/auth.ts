@@ -2,14 +2,26 @@
 //今まではcookieとパラーメータのuserIdを照らし合わせることしかしていない(?)
 
 import { cookies } from "next/headers";
+import { prisma } from "./prisma";
 
 export async function getLoggedInUserId(){
-    const cookieStore = await cookies();
-    const value = cookieStore.get("userId")?.value;
+    
 
-    if(!value){
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get("sessionId")?.value;
+
+    if(!sessionId){
         return null;
     }
-    //
-    return Number(value);
+
+
+    const session = await prisma.session.findUnique({
+        where: {id: sessionId},
+    })
+
+    if(!session){
+        return null;
+    }
+    
+    return session.user_id;
 }
